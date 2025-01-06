@@ -9,7 +9,7 @@ metadata:
 spec:
   env:
     - name: "DATABASE_URL"
-      value: "$(NAIS_DATABASE_REOPS_FASTAPI_REOPS_FASTAPI_URL)"
+      value: "$(NAIS_DATABASE_SKUP_BACKEND_SKUP_BACKEND_URL)"
     - name: "FORCE_SSL"
       value: "true"
     - name: "SSL_ROOT_CERT"
