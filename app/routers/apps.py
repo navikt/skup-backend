@@ -39,7 +39,7 @@ async def get_apps(app_id: Optional[UUID4] = Query(None), app_name: Optional[str
             query = query.filter(Apps.app_name.like(f"%{app_name}%"))
         results = query.all()
         if not results:
-            raise HTTPException(status_code=404, detail="App not found")
+            return []
         return [AppsResponseModel.from_orm(result) for result in results]
     except Exception as e:
         logger.error(f"Failed to fetch apps: {e}")
