@@ -6,6 +6,9 @@ metadata:
     team: team-researchops
   name: skup-backend
   namespace: team-researchops
+  annotations:
+    nginx.ingress.kubernetes.io/cors-allow-origin: "https://skup.ansatt.nav.no"
+    nginx.ingress.kubernetes.io/enable-cors: "true"
 spec:
   env:
     - name: "DATABASE_URL"
