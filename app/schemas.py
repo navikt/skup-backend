@@ -5,9 +5,11 @@ from datetime import datetime
 
 class AppsModel(BaseModel):
     app_name: str
+    app_owner: Optional[str] = None
 
 class AppsUpdateModel(BaseModel):
     app_name: Optional[str] = None
+    app_owner: Optional[str] = None
     is_active: Optional[bool] = None
 
     class Config:
@@ -16,6 +18,7 @@ class AppsUpdateModel(BaseModel):
 class AppsResponseModel(BaseModel):
     app_id: UUID4
     app_name: str
+    app_owner: Optional[str] = None
     is_active: bool = Field(default=True)
     created_at: datetime
 
