@@ -46,7 +46,6 @@ spec:
     inbound:
       rules:
         - application: skup
-          namespace: team-researchops
   ingresses:
     - https://skupapi.ansatt.nav.no
     - https://skupapi.intern.nav.no
