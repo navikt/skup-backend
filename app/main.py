@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from app.routers import apps, health, docs
@@ -6,6 +6,17 @@ from .database import engine
 from .config import logger
 
 app = FastAPI()
+
+@app.middleware("http")
+async def log_requests(request: Request, call_next):
+    logger.info(f"Incoming request: {request.method} {request.url}")
+    auth_header = request.headers.get("Authorization")
+    if auth_header:
+        logger.info(f"Authorization header: {auth_header}")
+    else:
+        logger.info("No Authorization header found")
+    response = await call_next(request)
+    return response
 
 app.include_router(apps)
 app.include_router(health)
