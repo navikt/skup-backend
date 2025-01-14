@@ -27,6 +27,12 @@ spec:
     requests:
       cpu: 50m
       memory: 128Mi
+  azure:
+    application:
+      enabled: true
+      allowAllUsers: true
+    sidecar:
+      enabled: true
   gcp:
     sqlInstances:
       - type: POSTGRES_17
