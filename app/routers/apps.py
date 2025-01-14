@@ -14,6 +14,9 @@ logger = logging.getLogger(__name__)
 # Create new app
 @router.post("/api/apps", response_model=AppsModel, tags=["Apps"])
 async def add_app(apps: AppsModel, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
+    if not apps.app_name:
+        raise HTTPException(status_code=400, detail="Du må oppgi et app navn.")
+
     new_app = Apps(
         app_name=apps.app_name,
         app_owner=apps.app_owner,
