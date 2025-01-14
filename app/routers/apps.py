@@ -1,19 +1,28 @@
-from fastapi import APIRouter, HTTPException, Depends, BackgroundTasks, Query
+from fastapi import APIRouter, HTTPException, Depends, BackgroundTasks, Query, Security
 from sqlalchemy.orm import Session
-from typing import List, Optional
+from typing import List, Optional, Any, Dict
 from datetime import datetime
 from pydantic import UUID4
 import logging
 from ..database import get_db
 from ..models import Apps
 from ..schemas import AppsModel, AppsResponseModel, AppsUpdateModel
+from ..auth import VerifyOauth2Token
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
 
+# Initialize token verification
+token_verification = VerifyOauth2Token()
+
 # Create new app
 @router.post("/api/apps", response_model=AppsModel, tags=["Apps"])
-async def add_app(apps: AppsModel, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
+async def add_app(
+    apps: AppsModel, 
+    background_tasks: BackgroundTasks, 
+    db: Session = Depends(get_db),
+    token: Dict[str, Any] = Security(token_verification.verify, scopes=["apps.write"])
+):
     if not apps.app_name:
         raise HTTPException(status_code=400, detail="Du må oppgi et app navn.")
 
@@ -34,7 +43,12 @@ async def add_app(apps: AppsModel, background_tasks: BackgroundTasks, db: Sessio
 
 # Get all apps or filter by app_id or app_name (partial match)
 @router.get("/api/apps", response_model=List[AppsResponseModel], tags=["Apps"])
-async def get_apps(app_id: Optional[UUID4] = Query(None), app_name: Optional[str] = Query(None), db: Session = Depends(get_db)):
+async def get_apps(
+    app_id: Optional[UUID4] = Query(None), 
+    app_name: Optional[str] = Query(None), 
+    db: Session = Depends(get_db),
+    token: Dict[str, Any] = Security(token_verification.verify, scopes=["apps.read"])
+):
     try:
         query = db.query(Apps)
         if app_id:
@@ -51,7 +65,11 @@ async def get_apps(app_id: Optional[UUID4] = Query(None), app_name: Optional[str
 
 # Delete an app by app_id
 @router.delete("/api/apps/{app_id}", response_model=AppsResponseModel, tags=["Apps"])
-async def delete_app(app_id: UUID4, db: Session = Depends(get_db)):
+async def delete_app(
+    app_id: UUID4, 
+    db: Session = Depends(get_db),
+    token: Dict[str, Any] = Security(token_verification.verify, scopes=["apps.write"])
+):
     try:
         app_to_delete = db.query(Apps).filter(Apps.app_id == app_id).first()
         if not app_to_delete:
@@ -69,7 +87,12 @@ async def delete_app(app_id: UUID4, db: Session = Depends(get_db)):
 
 # Update app details
 @router.put("/api/apps/{app_id}", response_model=AppsResponseModel, tags=["Apps"])
-async def update_app(app_id: UUID4, app_update: AppsUpdateModel, db: Session = Depends(get_db)):
+async def update_app(
+    app_id: UUID4, 
+    app_update: AppsUpdateModel, 
+    db: Session = Depends(get_db),
+    token: Dict[str, Any] = Security(token_verification.verify, scopes=["apps.write"])
+):
     try:
         app_to_update = db.query(Apps).filter(Apps.app_id == app_id).first()
         if not app_to_update:
