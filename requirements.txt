@@ -4,3 +4,9 @@ asyncpg
 python-dotenv
 sqlalchemy
 psycopg2-binary
+httpx
+pyjwt[crypto]
+structlog
+pydantic
+cryptography
+pydantic-settings
