@@ -19,6 +19,7 @@ async def add_app(apps: AppsModel, background_tasks: BackgroundTasks, db: Sessio
 
     new_app = Apps(
         app_name=apps.app_name,
+        app_owner="Testbruker",
         created_at=datetime.utcnow().replace(microsecond=0)
     )
     try:
