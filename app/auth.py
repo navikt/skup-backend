@@ -11,7 +11,7 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import OpenIdConnect, SecurityScopes
 from pydantic import AnyHttpUrl
 
-from app.settings import settings
+from app.auth.settings import settings
 
 token_security = OpenIdConnect(openIdConnectUrl=str(settings.well_known_url))
 """Definisjon av hvordan token autentisering må håndteres"""
