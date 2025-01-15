@@ -1,32 +1,17 @@
-# Build stage
-FROM python:3.11-slim as builder
+# Use the official Python image from the Docker Hub
+FROM python:3.11-slim
 
-# Set working directory
+# Set the working directory in the container
 WORKDIR /app
 
-# Copy requirements file
+# Copy the requirements file into the container
 COPY requirements.txt .
 
-# Install dependencies in a virtual environment
-RUN python -m venv /app/.venv && \
-    . /app/.venv/bin/activate && \
-    pip install --no-cache-dir -r requirements.txt
+# Install the dependencies
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy application code
+# Copy the application code and other necessary files into the container
 COPY app/ ./app/
 
-# Final stage using distroless
-FROM gcr.io/distroless/python3:nonroot
-
-# Copy virtual environment
-COPY --from=builder --chown=nonroot:nonroot /app/.venv /app/.venv
-
-# Copy application code
-COPY --from=builder --chown=nonroot:nonroot /app/app /app/app
-
-# Set the Python path to include the virtual environment
-ENV PATH="/app/.venv/bin:$PATH" \
-    PYTHONPATH="/app"
-
-# Command to run the FastAPI app
-CMD ["/app/.venv/bin/python", "-m", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8086"]
+# Command to run the FastAPI app using uvicorn
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8086"]
