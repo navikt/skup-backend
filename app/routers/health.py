@@ -1,5 +1,8 @@
+from fastapi import APIRouter
 from sqlalchemy.exc import SQLAlchemyError
 from app.database import SessionLocal
+
+router = APIRouter()
 
 # Sjekker om applikasjonen er i live
 @router.get("/api/isalive", tags=["Health"])
