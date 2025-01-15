@@ -4,8 +4,6 @@ Denne filen inneholder innstillinger relatert til autentisering og Azure AD.
 """
 
 from pydantic import AliasChoices, AnyHttpUrl, Field
-from app.config import BaseSettingsConfig
-
 
 class Settings(BaseSettingsConfig):
     """Innstillinger for autentisering"""

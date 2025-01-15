@@ -7,7 +7,7 @@ import logging
 from ..database import get_db
 from ..models import Apps
 from ..schemas import AppsModel, AppsResponseModel, AppsUpdateModel
-from app.auth import VerifyOauth2Token
+from ..auth import VerifyOauth2Token
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
