@@ -1,12 +1,22 @@
-"""Innstillinger for autentisering.
+"""Innstillinger for prosjektet.
 
-Denne filen inneholder innstillinger relatert til autentisering og Azure AD.
+Denne filen inneholder både innstillinger vi setter for prosjektet, men også
+innstillinger som vi må hente fra NAIS sine miljøvariabler.
 """
 
 from pydantic import AliasChoices, AnyHttpUrl, Field
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
-class Settings(BaseSettingsConfig):
-    """Innstillinger for autentisering"""
+
+class Settings(BaseSettings):
+    """Innstillinger for prosjektet"""
+
+    model_config = SettingsConfigDict(
+        env_prefix="nais_fastapi_",
+        env_file=".env",
+        env_file_encoding="utf-8",
+        env_nested_delimiter="__",
+    )
 
     client_id: str = Field(
         "skup-backend", validation_alias=AliasChoices("azure_app_client_id")
