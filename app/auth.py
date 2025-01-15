@@ -84,3 +84,8 @@ class VerifyOauth2Token:
         except jwt.InvalidTokenError:
             log.exception("Kunne ikke validere akkreditering")
             raise unauthenticated_exception
+
+        # Log the entire payload
+        log.info("Token payload", payload=payload)
+
+        return payload
