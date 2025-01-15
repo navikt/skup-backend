@@ -84,16 +84,3 @@ class VerifyOauth2Token:
         except jwt.InvalidTokenError:
             log.exception("Kunne ikke validere akkreditering")
             raise unauthenticated_exception
-        granted_scopes = payload.get("scp", "").split(" ")
-        for needed_scope in security_scopes.scopes:
-            if needed_scope not in granted_scopes:
-                log.warning(
-                    "Bruker mangler adganger",
-                    needed_scopes=security_scopes.scopes,
-                    granted_scopes=granted_scopes,
-                )
-                raise HTTPException(
-                    status_code=status.HTTP_403_FORBIDDEN,
-                    detail="Bruker mangler adganger",
-                )
-        return payload
