@@ -20,11 +20,9 @@ FROM gcr.io/distroless/python3-debian12
 WORKDIR /app
 
 # Copy Python dependencies and application code from builder
-COPY --from=builder /app/dependencies /app/dependencies
+COPY --from=builder /app/dependencies/* /usr/local/lib/python3.11/site-packages/
 COPY --from=builder /app/app /app/app
 
-# Add dependencies to Python path
-ENV PYTHONPATH=/app/dependencies
-
 # Command to run the FastAPI app using uvicorn
-CMD ["python", "-m", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8086"]
+ENTRYPOINT ["/usr/bin/python3", "-m", "uvicorn"]
+CMD ["app.main:app", "--host", "0.0.0.0", "--port", "8086"]
