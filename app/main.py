@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from app.routers import apps, health, docs
+from app.routers import apps, health, docs, devapps
 from .database import engine
 from .config import logger
 
@@ -16,6 +16,7 @@ async def log_requests(request: Request, call_next):
 app.include_router(apps)
 app.include_router(health)
 app.include_router(docs)
+app.include_router(devapps)
 
 app.add_middleware(
     CORSMiddleware,
