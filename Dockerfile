@@ -16,10 +16,7 @@ RUN python -m venv /app/.venv && \
 COPY app/ ./app/
 
 # Final stage using distroless
-FROM gcr.io/distroless/cc-debian12
-
-# Copy Python installation from builder
-COPY --from=builder --chown=nonroot:nonroot /usr/local /usr/local
+FROM gcr.io/distroless/python3:nonroot
 
 # Copy virtual environment
 COPY --from=builder --chown=nonroot:nonroot /app/.venv /app/.venv
@@ -30,9 +27,6 @@ COPY --from=builder --chown=nonroot:nonroot /app/app /app/app
 # Set the Python path to include the virtual environment
 ENV PATH="/app/.venv/bin:$PATH" \
     PYTHONPATH="/app"
-
-# Use nonroot user
-USER nonroot
 
 # Command to run the FastAPI app
 CMD ["/app/.venv/bin/python", "-m", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8086"]
