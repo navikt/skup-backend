@@ -16,6 +16,7 @@ logger = logging.getLogger(__name__)
 token_verification = VerifyOauth2Token()
 
 # Create new app
+# app/routers/apps.py
 @router.post("/api/apps", response_model=AppsModel, tags=["Apps"])
 async def add_app(
     apps: AppsModel,
@@ -45,11 +46,12 @@ async def add_app(
         logger.error(f"Failed to insert app: {e}")
         raise HTTPException(status_code=500, detail="Failed to add app.")
 
-# Get all apps or filter by app_id or app_name (partial match)
+# Get all apps or filter by app_id, app_name, or app_owner (partial match)
 @router.get("/api/apps", response_model=List[AppsResponseModel], tags=["Apps"])
 async def get_apps(
-    app_id: Optional[UUID4] = Query(None), 
-    app_name: Optional[str] = Query(None), 
+    app_id: Optional[UUID4] = Query(None),
+    app_name: Optional[str] = Query(None),
+    app_owner: Optional[str] = Query(None),
     db: Session = Depends(get_db),
     token: Dict[str, Any] = Security(token_verification.verify, scopes=["apps.read"])
 ):
@@ -59,6 +61,8 @@ async def get_apps(
             query = query.filter(Apps.app_id == app_id)
         if app_name:
             query = query.filter(Apps.app_name.like(f"%{app_name}%"))
+        if app_owner:
+            query = query.filter(Apps.app_owner.like(f"%{app_owner}%"))
         results = query.all()
         if not results:
             return []
@@ -66,7 +70,7 @@ async def get_apps(
     except Exception as e:
         logger.error(f"Failed to fetch apps: {e}")
         raise HTTPException(status_code=500, detail="Failed to fetch apps.")
-
+        
 # Delete an app by app_id
 @router.delete("/api/apps/{app_id}", response_model=AppsResponseModel, tags=["Apps"])
 async def delete_app(

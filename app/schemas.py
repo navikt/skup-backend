@@ -5,11 +5,9 @@ from datetime import datetime
 
 class AppsModel(BaseModel):
     app_name: str
-    app_owner: Optional[str] = None
 
 class AppsUpdateModel(BaseModel):
     app_name: Optional[str] = None
-    app_owner: Optional[str] = None
     is_active: Optional[bool] = None
 
     class Config:
