@@ -18,17 +18,21 @@ token_verification = VerifyOauth2Token()
 # Create new app
 @router.post("/api/apps", response_model=AppsModel, tags=["Apps"])
 async def add_app(
-    apps: AppsModel, 
-    background_tasks: BackgroundTasks, 
+    apps: AppsModel,
+    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
     token: Dict[str, Any] = Security(token_verification.verify, scopes=["apps.write"])
 ):
     if not apps.app_name:
         raise HTTPException(status_code=400, detail="Du må oppgi et app navn.")
 
+    app_owner = token.get("preferred_username")
+    if not app_owner:
+        raise HTTPException(status_code=400, detail="Token does not contain preferred_username.")
+
     new_app = Apps(
         app_name=apps.app_name,
-        app_owner=apps.app_owner,
+        app_owner=app_owner,
         created_at=datetime.utcnow().replace(microsecond=0)
     )
     try:

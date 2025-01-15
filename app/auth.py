@@ -86,6 +86,6 @@ class VerifyOauth2Token:
             raise unauthenticated_exception
 
         # Log the entire payload
-        log.info("Token payload", payload=payload)
+        # log.info("Token payload", payload=payload)
 
         return payload
