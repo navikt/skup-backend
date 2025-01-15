@@ -22,7 +22,7 @@ async def add_app(
     apps: AppsModel,
     background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
-    token: Dict[str, Any] = Security(token_verification.verify, scopes=["apps.write"])
+    token: Dict[str, Any] = Security(token_verification.verify)
 ):
     if not apps.app_name:
         raise HTTPException(status_code=400, detail="Du må oppgi et app navn.")
@@ -53,7 +53,7 @@ async def get_apps(
     app_name: Optional[str] = Query(None),
     app_owner: Optional[str] = Query(None),
     db: Session = Depends(get_db),
-    token: Dict[str, Any] = Security(token_verification.verify, scopes=["apps.read"])
+    token: Dict[str, Any] = Security(token_verification.verify)
 ):
     try:
         query = db.query(Apps)
@@ -70,13 +70,13 @@ async def get_apps(
     except Exception as e:
         logger.error(f"Failed to fetch apps: {e}")
         raise HTTPException(status_code=500, detail="Failed to fetch apps.")
-        
+
 # Delete an app by app_id
 @router.delete("/api/apps/{app_id}", response_model=AppsResponseModel, tags=["Apps"])
 async def delete_app(
     app_id: UUID4, 
     db: Session = Depends(get_db),
-    token: Dict[str, Any] = Security(token_verification.verify, scopes=["apps.write"])
+    token: Dict[str, Any] = Security(token_verification.verify)
 ):
     try:
         app_to_delete = db.query(Apps).filter(Apps.app_id == app_id).first()
@@ -99,7 +99,7 @@ async def update_app(
     app_id: UUID4, 
     app_update: AppsUpdateModel, 
     db: Session = Depends(get_db),
-    token: Dict[str, Any] = Security(token_verification.verify, scopes=["apps.write"])
+    token: Dict[str, Any] = Security(token_verification.verify)
 ):
     try:
         app_to_update = db.query(Apps).filter(Apps.app_id == app_id).first()
