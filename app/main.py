@@ -9,12 +9,7 @@ app = FastAPI()
 
 @app.middleware("http")
 async def log_requests(request: Request, call_next):
-    logger.info(f"Incoming request: {request.method} {request.url}")
     auth_header = request.headers.get("Authorization")
-    if auth_header:
-        logger.info(f"Found Authz")
-    else:
-        logger.info("No Authz")
     response = await call_next(request)
     return response
 
