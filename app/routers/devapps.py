@@ -76,8 +76,6 @@ async def update_app(app_id: UUID4, app_update: AppsUpdateModel, db: Session = D
 
         if app_update.app_name is not None:
             app_to_update.app_name = app_update.app_name
-"""         if app_update.app_owner is not None:
-            app_to_update.app_owner = app_update.app_owner """
         if app_update.is_active is not None:
             app_to_update.is_active = app_update.is_active
 
