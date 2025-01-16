@@ -3,5 +3,5 @@ import logging
 
 load_dotenv()
 
-logging.basicConfig(level=logging.WARNING)
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

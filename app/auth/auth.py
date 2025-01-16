@@ -5,18 +5,22 @@ import httpx
 import jwt
 import structlog
 from fastapi import Depends, HTTPException, status
-from fastapi.security import OpenIdConnect, SecurityScopes
+from fastapi.security import OAuth2PasswordBearer, SecurityScopes
 from pydantic import AnyHttpUrl
 from typing import Annotated, Any
 
 from app.auth.settings import settings
 
-token_security = OpenIdConnect(openIdConnectUrl=str(settings.well_known_url))
+token_security = OAuth2PasswordBearer(
+    tokenUrl="token",
+    auto_error=True
+)
 log = structlog.get_logger("api.auth")
 
 class VerifyOauth2Token:
     def __init__(self) -> None:
         self.skip_auth = os.getenv("SKIP_AUTH", "false").lower() == "true"
+        log.info(f"Auth initialization - SKIP_AUTH is set to: {self.skip_auth}")
         if not self.skip_auth:
             self.oidc_url: AnyHttpUrl = settings.well_known_url
             self.client_id: str = settings.client_id
@@ -36,7 +40,9 @@ class VerifyOauth2Token:
         security_scopes: SecurityScopes,
         token: Annotated[str, Depends(token_security)],
     ) -> dict[str, Any]:
+        log.info(f"Verifying token with SKIP_AUTH={self.skip_auth}")
         if self.skip_auth:
+            log.info("Auth check bypassed due to SKIP_AUTH=true")
             return {"preferred_username": "local_user"}
 
         unauthenticated_exception = HTTPException(
@@ -44,10 +50,6 @@ class VerifyOauth2Token:
             detail="Ikke gyldig akkreditering",
             headers={"WWW-Authenticate": "Bearer"},
         )
-        scheme, token = token.split(" ", maxsplit=1)
-        if scheme != "Bearer":
-            log.error("Ukjent autentisering scheme", token=token, scheme=scheme)
-            raise unauthenticated_exception
         try:
             signing_key = self.jwks_client.get_signing_key_from_jwt(token)
         except jwt.exceptions.PyJWKClientError:
