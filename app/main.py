@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from app.routers import apps, health, docs, devapps
+from app.routers import apps, health, docs
 from .database import engine
 from .config import logger
 from fastapi.openapi.utils import get_openapi
@@ -21,7 +21,6 @@ if skip_auth:
 app.include_router(apps)
 app.include_router(health)
 app.include_router(docs)
-app.include_router(devapps)
 
 app.add_middleware(
     CORSMiddleware,
