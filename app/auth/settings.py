@@ -10,12 +10,14 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
     """Innstillinger for prosjektet"""
 
+    """ Ved behov
     model_config = SettingsConfigDict(
         env_prefix="skup_fastapi_",
         env_file=".env",
         env_file_encoding="utf-8",
         env_nested_delimiter="__",
     )
+    """
 
     client_id: str = Field(
         "skup-backend", validation_alias=AliasChoices("azure_app_client_id")

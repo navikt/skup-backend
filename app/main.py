@@ -1,27 +1,29 @@
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from app.routers import apps, health, docs
 from .database import engine
 from .config import logger
 from fastapi.openapi.utils import get_openapi
 import os
+from app.routers import apps, health, docs
 
 app = FastAPI()
 
-# Get SKIP_AUTH value
-skip_auth = os.getenv("SKIP_AUTH", "false").lower() == "true"
-
-# Configure CORS headers based on environment
-allow_headers = ["Content-Type"]
-if skip_auth:
-    allow_headers.append("Authorization")
-    logger.info("Development mode: Adding Authorization to CORS headers")
-
+# Inkluder alle API-rutere
 app.include_router(apps)
 app.include_router(health)
 app.include_router(docs)
 
+# SKIP_AUTH verdi avgjør om NAIS Auth skla kjøres eller ikke
+skip_auth = os.getenv("SKIP_AUTH", "false").lower() == "true"
+
+# Konfigurer CORS-headers basert på miljø
+allow_headers = ["Content-Type"]
+if skip_auth:
+    allow_headers.append("Authorization")
+    logger.info("Utviklingsmodus: Legger til Authorization i CORS-headers")
+
+# Konfigurer CORS-middleware
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -30,26 +32,30 @@ app.add_middleware(
     allow_headers=allow_headers,
 )
 
+# Håndter alle uventede feil
 @app.exception_handler(Exception)
 async def generic_exception_handler(request, exc):
-    logger.error(f"Unhandled error: {exc}")
+    logger.error(f"Uhåndtert feil: {exc}")
     return JSONResponse(
-        content={"message": "An internal server error occurred. Please try again later.", "details": str(exc)},
+        content={"message": "En intern serverfeil oppstod. Vennligst prøv igjen senere.", "details": str(exc)},
         status_code=500
     )
 
+# Oppstartshendelse
 @app.on_event("startup")
 async def startup():
-    logger.info(f"SKIP_AUTH environment variable: {os.getenv('SKIP_AUTH')}")
+    logger.info(f"SKIP_AUTH funnet - Utviklingsmodus er aktivert")
     engine.connect()
-    logger.info("Database connection established.")
+    logger.info("Databasetilkobling etablert.")
 
+# Avslutningshendelse
 @app.on_event("shutdown")
 def shutdown():
     if engine.pool:
         engine.pool.dispose()
-        logger.info("Database connection pool disposed.")
+        logger.info("Databasetilkoblingspool frigjort.")
 
+# Tilpass OpenAPI-dokumentasjon med sikkerhetskrav
 def custom_openapi():
     if app.openapi_schema:
         return app.openapi_schema
@@ -61,7 +67,7 @@ def custom_openapi():
         routes=app.routes,
     )
     
-    # Add security scheme
+    # Legg til sikkerhetsskjema for JWT
     openapi_schema["components"]["securitySchemes"] = {
         "bearerAuth": {
             "type": "http",
@@ -70,10 +76,10 @@ def custom_openapi():
         }
     }
     
-    # Add global security requirement
+    # Legg til globalt sikkerhetskrav
     openapi_schema["security"] = [{"bearerAuth": []}]
     
-    # Ensure security is applied to all paths
+    # Sikre at sikkerhet er påkrevd for alle endepunkter
     for path in openapi_schema["paths"].values():
         for operation in path.values():
             operation["security"] = [{"bearerAuth": []}]
