@@ -31,8 +31,6 @@ spec:
     application:
       enabled: true
       allowAllUsers: true
-    sidecar:
-      enabled: true
   gcp:
     sqlInstances:
       - type: POSTGRES_17
@@ -49,8 +47,6 @@ spec:
     inbound:
       rules:
         - application: skup
-  ingresses:
-    - https://skupapi.intern.nav.no
   liveness:
     path: /api/isalive
     initialDelay: 20
