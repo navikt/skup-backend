@@ -1,50 +1,44 @@
-#!/usr/bin/env python3
+# app/auth/auth.py
 
-"""Autentiseringstøtte for FastAPI."""
-
-from typing import Annotated, Any
-
+import os
 import httpx
 import jwt
 import structlog
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OpenIdConnect, SecurityScopes
 from pydantic import AnyHttpUrl
+from typing import Annotated, Any
 
 from app.auth.settings import settings
 
 token_security = OpenIdConnect(openIdConnectUrl=str(settings.well_known_url))
-"""Definisjon av hvordan token autentisering må håndteres"""
-
 log = structlog.get_logger("api.auth")
-"""Log for feilmeldinger"""
-
 
 class VerifyOauth2Token:
-    """Klasse som støtter verifisering av NAIS OAuth2 token i FastAPI."""
-
     def __init__(self) -> None:
-        """Opprett en ny instans ved å sjekke metadata discovery document."""
-        self.oidc_url: AnyHttpUrl = settings.well_known_url
-        self.client_id: str = settings.client_id
-        # Hent OIDC konfigurasjon fra angitt URL
-        self.oidc_config: dict[str, Any] = (
-            httpx.get(str(self.oidc_url)).raise_for_status().json()
-        )
-        self.jwks_client: jwt.PyJWKClient = jwt.PyJWKClient(
-            self.oidc_config["jwks_uri"]
-        )
-        self.signing_algos: list[str] = self.oidc_config[
-            "id_token_signing_alg_values_supported"
-        ]
-        self.issuer: str = self.oidc_config["issuer"]
+        self.skip_auth = os.getenv("SKIP_AUTH", "false").lower() == "true"
+        if not self.skip_auth:
+            self.oidc_url: AnyHttpUrl = settings.well_known_url
+            self.client_id: str = settings.client_id
+            self.oidc_config: dict[str, Any] = (
+                httpx.get(str(self.oidc_url)).raise_for_status().json()
+            )
+            self.jwks_client: jwt.PyJWKClient = jwt.PyJWKClient(
+                self.oidc_config["jwks_uri"]
+            )
+            self.signing_algos: list[str] = self.oidc_config[
+                "id_token_signing_alg_values_supported"
+            ]
+            self.issuer: str = self.oidc_config["issuer"]
 
     async def verify(
         self,
         security_scopes: SecurityScopes,
         token: Annotated[str, Depends(token_security)],
     ) -> dict[str, Any]:
-        """Verifiser at spørring har gyldig Entra ID token."""
+        if self.skip_auth:
+            return {"preferred_username": "local_user"}
+
         unauthenticated_exception = HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Ikke gyldig akkreditering",
@@ -71,8 +65,6 @@ class VerifyOauth2Token:
                 token,
                 signing_key.key,
                 algorithms=self.signing_algos,
-                # Basert på NAIS sin dokumentasjon, skal en token inneholde:
-                # https://doc.nais.io/auth/explanations/#claims-validation
                 options={
                     "require": ["iss", "exp", "aud", "iat"],
                     "verify_signature": True,
@@ -84,8 +76,5 @@ class VerifyOauth2Token:
         except jwt.InvalidTokenError:
             log.exception("Kunne ikke validere akkreditering")
             raise unauthenticated_exception
-
-        # Log the entire payload
-        # log.info("Token payload", payload=payload)
 
         return payload

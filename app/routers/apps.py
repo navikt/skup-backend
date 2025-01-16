@@ -16,7 +16,6 @@ logger = logging.getLogger(__name__)
 token_verification = VerifyOauth2Token()
 
 # Create new app
-# app/routers/apps.py
 @router.post("/api/apps", response_model=AppsModel, tags=["Apps"])
 async def add_app(
     apps: AppsModel,
