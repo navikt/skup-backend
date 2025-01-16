@@ -6,6 +6,7 @@ services:
     ports:
       - "8086:8086"
     environment:
+      - DATABASE_URL=postgresql://eilifjohansen@host.docker.internal:5432/skupapi
+      - FORCE_SSL=false
+      - SKIP_AUTH=true
       - PYTHONUNBUFFERED=1
-    env_file:
-      - .env

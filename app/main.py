@@ -73,6 +73,7 @@ def custom_openapi():
             "type": "http",
             "scheme": "bearer",
             "bearerFormat": "JWT",
+            "description": "Legg til en tilfeldig token. Eksempelvis: `test-token`"
         }
     }
     
