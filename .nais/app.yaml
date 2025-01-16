@@ -49,8 +49,6 @@ spec:
     inbound:
       rules:
         - application: skup
-  ingresses:
-    - https://skupapi.intern.nav.no
   liveness:
     path: /api/isalive
     initialDelay: 20
