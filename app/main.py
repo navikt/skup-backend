@@ -18,13 +18,6 @@ if skip_auth:
     allow_headers.append("Authorization")
     logger.info("Development mode: Adding Authorization to CORS headers")
 
-@app.middleware("http")
-async def log_requests(request: Request, call_next):
-    auth_header = request.headers.get("Authorization")
-    logger.info(f"Incoming request auth header: {auth_header}") 
-    response = await call_next(request)
-    return response
-
 app.include_router(apps)
 app.include_router(health)
 app.include_router(docs)

@@ -40,7 +40,6 @@ class VerifyOauth2Token:
         security_scopes: SecurityScopes,
         token: Annotated[str, Depends(token_security)],
     ) -> dict[str, Any]:
-        log.info(f"Verifying token with SKIP_AUTH={self.skip_auth}")
         if self.skip_auth:
             log.info("Auth check bypassed due to SKIP_AUTH=true")
             return {"preferred_username": "local_user"}
