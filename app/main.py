@@ -55,9 +55,9 @@ def custom_openapi():
         return app.openapi_schema
     
     openapi_schema = get_openapi(
-        title="Your API Title",
+        title="Skup API",
         version="1.0.0",
-        description="Your API description",
+        description="",
         routes=app.routes,
     )
     
