@@ -3,19 +3,18 @@ from sqlalchemy.orm import Session
 from typing import List, Optional, Any, Dict
 from datetime import datetime
 from pydantic import UUID4
-import logging
+from ..logger import logger
 from ..database import get_db
 from ..models import Apps
 from ..schemas import AppsModel, AppsResponseModel, AppsUpdateModel
 from app.auth import VerifyOauth2Token
 
 router = APIRouter()
-logger = logging.getLogger(__name__)
 
-# Initialize token verification
+# Initialiser token-verifisering
 token_verification = VerifyOauth2Token()
 
-# Create new app
+# Opprett ny app
 @router.post("/api/apps", response_model=AppsModel, tags=["Apps"])
 async def add_app(
     apps: AppsModel,
@@ -24,11 +23,11 @@ async def add_app(
     token: Dict[str, Any] = Security(token_verification.verify)
 ):
     if not apps.app_name:
-        raise HTTPException(status_code=400, detail="Du må oppgi et app navn.")
+        raise HTTPException(status_code=400, detail="Du må oppgi et appnavn.")
 
     app_owner = token.get("preferred_username")
     if not app_owner:
-        raise HTTPException(status_code=400, detail="Token does not contain preferred_username.")
+        raise HTTPException(status_code=400, detail="Token inneholder ikke preferred_username.")
 
     new_app = Apps(
         app_name=apps.app_name,
@@ -42,10 +41,10 @@ async def add_app(
         return new_app
     except Exception as e:
         db.rollback()
-        logger.error(f"Failed to insert app: {e}")
-        raise HTTPException(status_code=500, detail="Failed to add app.")
+        logger.error(f"Kunne ikke legge til app: {e}")
+        raise HTTPException(status_code=500, detail="Kunne ikke legge til app.")
 
-# Get all apps or filter by app_id, app_name, or app_owner (partial match)
+# Hent alle apper eller filtrer etter app_id, app_name eller app_owner (delvis samsvar)
 @router.get("/api/apps", response_model=List[AppsResponseModel], tags=["Apps"])
 async def get_apps(
     app_id: Optional[UUID4] = Query(None),
@@ -67,20 +66,20 @@ async def get_apps(
             return []
         return [AppsResponseModel.from_orm(result) for result in results]
     except Exception as e:
-        logger.error(f"Failed to fetch apps: {e}")
-        raise HTTPException(status_code=500, detail="Failed to fetch apps.")
+        logger.error(f"Kunne ikke hente apper: {e}")
+        raise HTTPException(status_code=500, detail="Kunne ikke hente apper.")
 
-# Delete an app by app_id
+# Slett en app etter app_id
 @router.delete("/api/apps/{app_id}", response_model=AppsResponseModel, tags=["Apps"])
 async def delete_app(
-    app_id: UUID4, 
+    app_id: UUID4,
     db: Session = Depends(get_db),
     token: Dict[str, Any] = Security(token_verification.verify)
 ):
     try:
         app_to_delete = db.query(Apps).filter(Apps.app_id == app_id).first()
         if not app_to_delete:
-            raise HTTPException(status_code=404, detail="App not found")
+            raise HTTPException(status_code=404, detail="App ikke funnet")
 
         db.delete(app_to_delete)
         db.commit()
@@ -89,25 +88,25 @@ async def delete_app(
         raise e
     except Exception as e:
         db.rollback()
-        logger.error(f"Failed to delete app: {e}")
-        raise HTTPException(status_code=500, detail="Failed to delete app.")
+        logger.error(f"Kunne ikke slette app: {e}")
+        raise HTTPException(status_code=500, detail="Kunne ikke slette app.")
 
-# Update app details
+# Oppdater app-detaljer
 @router.put("/api/apps/{app_id}", response_model=AppsResponseModel, tags=["Apps"])
 async def update_app(
-    app_id: UUID4, 
-    app_update: AppsUpdateModel, 
+    app_id: UUID4,
+    app_update: AppsUpdateModel,
     db: Session = Depends(get_db),
     token: Dict[str, Any] = Security(token_verification.verify)
 ):
     try:
         app_to_update = db.query(Apps).filter(Apps.app_id == app_id).first()
         if not app_to_update:
-            raise HTTPException(status_code=404, detail="App not found")
+            raise HTTPException(status_code=404, detail="App ikke funnet")
 
         if app_update.app_name is not None:
             app_to_update.app_name = app_update.app_name
-        if app_update.app_owner is not None:  # Add this block
+        if app_update.app_owner is not None:
             app_to_update.app_owner = app_update.app_owner
         if app_update.is_active is not None:
             app_to_update.is_active = app_update.is_active
@@ -117,5 +116,5 @@ async def update_app(
         return app_to_update
     except Exception as e:
         db.rollback()
-        logger.error(f"Failed to update app: {e}")
-        raise HTTPException(status_code=500, detail="Failed to update app.")
+        logger.error(f"Kunne ikke oppdatere app: {e}")
+        raise HTTPException(status_code=500, detail="Kunne ikke oppdatere app.")

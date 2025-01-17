@@ -2,7 +2,7 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from .database import engine
-from .config import logger
+from .logger import logger
 from fastapi.openapi.utils import get_openapi
 import os
 from app.routers import apps, health, docs

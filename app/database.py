@@ -3,18 +3,18 @@ from dotenv import load_dotenv
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
-import logging
+from .logger import logger
 
-# Load environment variables from .env file
+# Last inn miljøvariabler fra .env filen
 load_dotenv()
 
-logger = logging.getLogger(__name__)
-
+# Hent database URL fra miljøvariabler
 DATABASE_URL = os.getenv("DATABASE_URL")
 
 if not DATABASE_URL:
-    logger.error("DATABASE_URL is not set. Please check your environment variables.")
+    logger.error("DATABASE_URL er ikke satt. Vennligst sjekk miljøvariablene dine.")
 
+# Sjekk om SSL skal tvinges
 FORCE_SSL = os.getenv("FORCE_SSL", "false").lower() == "true"
 
 connect_args = {}
@@ -26,6 +26,7 @@ if FORCE_SSL:
         "sslkey": os.getenv("SSL_KEY")
     }
 
+# Opprett database motor
 engine = create_engine(
     DATABASE_URL,
     pool_size=5,
@@ -33,10 +34,13 @@ engine = create_engine(
     connect_args=connect_args
 )
 
+# Opprett en sesjonsfabrikk
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
+# Opprett en baseklasse for modeller
 Base = declarative_base()
 
+# Generator for å hente en database sesjon
 def get_db():
     db = SessionLocal()
     try:
