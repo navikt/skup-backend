@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
-from .logger import logger
+from app.logger import logger
 
 # Last inn miljøvariabler fra .env filen
 load_dotenv()

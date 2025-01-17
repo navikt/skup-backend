@@ -1,12 +1,12 @@
 import os
 import httpx
 import jwt
-import structlog
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, SecurityScopes
 from pydantic import AnyHttpUrl
 from typing import Annotated, Any
 from app.auth.settings import settings
+from app.logger import logger
 
 # Definerer OAuth2PasswordBearer for token-sikkerhet
 token_security = OAuth2PasswordBearer(
@@ -14,14 +14,11 @@ token_security = OAuth2PasswordBearer(
     auto_error=True
 )
 
-# Initialiserer logger
-log = structlog.get_logger("api.auth")
-
 class VerifyOauth2Token:
     def __init__(self) -> None:
         # Sjekker om autentisering skal hoppes over
         self.skip_auth = os.getenv("SKIP_AUTH", "false").lower() == "true"
-        log.info(f"SKIP_AUTH er satt til: {self.skip_auth}")
+        logger.info(f"SKIP_AUTH er satt til: {self.skip_auth}")
 
         if not self.skip_auth:
             # Henter OIDC-konfigurasjon fra URL
@@ -46,7 +43,7 @@ class VerifyOauth2Token:
         token: Annotated[str, Depends(token_security)],
     ) -> dict[str, Any]:
         if self.skip_auth:
-            log.info("Autentiseringskontroll omgått på grunn av SKIP_AUTH=true")
+            logger.info("Autentiseringskontroll omgått på grunn av SKIP_AUTH=true")
             return {"preferred_username": "local_user"}
 
         # Definerer en HTTPException for uautentisert tilgang
@@ -60,13 +57,13 @@ class VerifyOauth2Token:
             # Henter signeringsnøkkel fra JWT-token
             signing_key = self.jwks_client.get_signing_key_from_jwt(token)
         except jwt.exceptions.PyJWKClientError:
-            log.exception(
+            logger.exception(
                 "Klarte ikke å hente signeringsnøkkel ",
                 f"fra JWKS ({self.jwks_client.uri}) endepunkt!",
             )
             raise unauthenticated_exception
         except jwt.DecodeError:
-            log.exception("Klarte ikke å dekode token", token=token)
+            logger.exception("Klarte ikke å dekode token", token=token)
             raise unauthenticated_exception
 
         try:
@@ -84,7 +81,7 @@ class VerifyOauth2Token:
                 verify=True,
             )
         except jwt.InvalidTokenError:
-            log.exception("Kunne ikke validere akkreditering")
+            logger.exception("Kunne ikke validere akkreditering")
             raise unauthenticated_exception
 
         return payload
