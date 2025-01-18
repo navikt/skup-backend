@@ -1,4 +1,3 @@
-# app/config/openapi.py
 import os
 from fastapi.openapi.utils import get_openapi
 
