@@ -5,14 +5,12 @@ from app.database import engine
 from app.logger import logger
 import os
 from fastapi.openapi.utils import get_openapi
-from app.routers import apps, health, docs
+from app.routers import include_routers
 
 app = FastAPI()
 
-# Inkluder alle API-rutere
-app.include_router(apps)
-app.include_router(health)
-app.include_router(docs)
+# Inkluder API-rutere fra app/routers/__init__.py
+include_routers(app)
 
 # SKIP_AUTH verdi avgjør om NAIS Auth skla kjøres eller ikke
 skip_auth = os.getenv("SKIP_AUTH", "false").lower() == "true"
@@ -59,14 +57,14 @@ def shutdown():
 def custom_openapi():
     if app.openapi_schema:
         return app.openapi_schema
-    
+
     openapi_schema = get_openapi(
         title="Skup API",
         version="1.0.0",
         description="",
         routes=app.routes,
     )
-    
+
     # Legg til sikkerhetsskjema for JWT
     openapi_schema["components"]["securitySchemes"] = {
         "bearerAuth": {
@@ -76,15 +74,15 @@ def custom_openapi():
             "description": "Legg til en tilfeldig token. Eksempelvis: `test-token`"
         }
     }
-    
+
     # Legg til globalt sikkerhetskrav
     openapi_schema["security"] = [{"bearerAuth": []}]
-    
+
     # Sikre at sikkerhet er påkrevd for alle endepunkter
     for path in openapi_schema["paths"].values():
         for operation in path.values():
             operation["security"] = [{"bearerAuth": []}]
-    
+
     app.openapi_schema = openapi_schema
     return app.openapi_schema
 
