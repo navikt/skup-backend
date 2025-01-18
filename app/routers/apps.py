@@ -18,7 +18,6 @@ token_verification = VerifyOauth2Token()
 @router.post("/api/apps", response_model=AppsModel, tags=["Apps"])
 async def add_app(
     apps: AppsModel,
-    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
     token: Dict[str, Any] = Security(token_verification.verify)
 ):
