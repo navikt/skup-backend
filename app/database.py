@@ -9,7 +9,10 @@ from app.config.logger import logger
 load_dotenv()
 
 # Hent database URL fra miljøvariabler
-DATABASE_URL = os.getenv("DATABASE_URL")
+if os.getenv("DOCKER") == "1":
+    DATABASE_URL = os.getenv("DATABASE_URL_DOCKER")
+else:
+    DATABASE_URL = os.getenv("DATABASE_URL")
 
 if not DATABASE_URL:
     logger.error("DATABASE_URL er ikke satt. Vennligst sjekk miljøvariablene dine.")
