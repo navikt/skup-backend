@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from typing import List, Optional, Any, Dict
 from datetime import datetime
 from pydantic import UUID4
-from app.logger import logger
+from app.config.logger import logger
 from app.database import get_db
 from app.models import Apps
 from app.schemas import AppsModel, AppsResponseModel, AppsUpdateModel

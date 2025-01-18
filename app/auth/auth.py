@@ -6,7 +6,7 @@ from fastapi.security import OAuth2PasswordBearer, SecurityScopes
 from pydantic import AnyHttpUrl
 from typing import Annotated, Any
 from app.auth.settings import settings
-from app.logger import logger
+from app.config.logger import logger
 
 # Definerer OAuth2PasswordBearer for token-sikkerhet
 token_security = OAuth2PasswordBearer(
