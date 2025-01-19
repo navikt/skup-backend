@@ -28,6 +28,11 @@ async def add_app(
     if not app_owner:
         raise HTTPException(status_code=400, detail="Token inneholder ikke preferred_username.")
 
+    # Sjekk om appnavn er unikt
+    existing_app = db.query(Apps).filter(Apps.app_name == apps.app_name).first()
+    if existing_app:
+        raise HTTPException(status_code=400, detail="En app med dette navnet eksisterer allerede. Du må velge et unikt appnavn.")
+
     new_app = Apps(
         app_name=apps.app_name,
         app_owner=app_owner,
