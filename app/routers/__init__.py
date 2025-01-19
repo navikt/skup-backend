@@ -1,6 +1,5 @@
 from app.routers.apps import router as apps
-from app.routers.monitoring.health import router as health
-from app.routers.monitoring.docs import router as docs
+from app.routers.monitoring import health, docs
 
 # Inkluder API-rutere
 def include_routers(app):
