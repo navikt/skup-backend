@@ -22,7 +22,7 @@ def configure_openapi(app):
                 "type": "http",
                 "scheme": "bearer",
                 "bearerFormat": "JWT",
-                "description": "Add a random token. For example: `test-token`"
+                "description": "For local development: Use any token, e.g., `test-token`"
             }
         }
 
