@@ -6,7 +6,7 @@ from pydantic import UUID4
 from app.config.logger import logger
 from app.database import get_db
 from app.routers.apps.models import Apps
-from app.routers.apps.schemas import git rm -r --cached __pycache__
+from app.routers.apps.schemas import
 from app.auth import VerifyOauth2Token
 
 router = APIRouter()
