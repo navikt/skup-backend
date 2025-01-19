@@ -43,7 +43,7 @@ class VerifyOauth2Token:
         token: Annotated[str, Depends(token_security)],
     ) -> dict[str, Any]:
         if self.skip_auth:
-            logger.info("Autentiseringskontroll omgått på grunn av SKIP_AUTH=true")
+            # logger.info("Autentiseringskontroll omgått på grunn av SKIP_AUTH=true")
             return {"preferred_username": "local_user"}
 
         # Definerer en HTTPException for uautentisert tilgang

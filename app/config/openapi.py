@@ -26,11 +26,10 @@ def configure_openapi(app):
             }
         }
 
-        openapi_schema["security"] = [{"bearerAuth": []}]
-
-        for path in openapi_schema["paths"].values():
-            for operation in path.values():
-                operation["security"] = [{"bearerAuth": []}]
+        for path, path_item in openapi_schema["paths"].items():
+            for method, operation in path_item.items():
+                if "security" in operation:
+                    operation["security"] = [{"bearerAuth": []}]
 
         app.openapi_schema = openapi_schema
         return app.openapi_schema
