@@ -84,6 +84,6 @@ class VerifyOauth2Token:
             logger.exception("Kunne ikke validere akkreditering")
             raise unauthenticated_exception
 
-logger.warning(f"Decoded JWT payload: {json.dumps(payload, indent=2)}")
+        logger.warning(f"Decoded JWT payload: {json.dumps(payload, indent=2)}")
 
         return payload
