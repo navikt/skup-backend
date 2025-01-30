@@ -1,6 +1,7 @@
 import os
 import httpx
 import jwt
+import json
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, SecurityScopes
 from pydantic import AnyHttpUrl
@@ -43,7 +44,6 @@ class VerifyOauth2Token:
         token: Annotated[str, Depends(token_security)],
     ) -> dict[str, Any]:
         if self.skip_auth:
-            # logger.info("Autentiseringskontroll omgått på grunn av SKIP_AUTH=true")
             return {"preferred_username": "local_user"}
 
         # Definerer en HTTPException for uautentisert tilgang
@@ -80,10 +80,9 @@ class VerifyOauth2Token:
                 issuer=self.issuer,
                 verify=True,
             )
+            # Move the logger here, before the return
+            logger.warning(f"Payload: {json.dumps(payload, indent=2)}")
+            return payload
         except jwt.InvalidTokenError:
             logger.exception("Kunne ikke validere akkreditering")
             raise unauthenticated_exception
-
-        logger.warning(f"Decoded JWT payload: {json.dumps(payload, indent=2)}")
-
-        return payload
