@@ -81,7 +81,7 @@ class VerifyOauth2Token:
                 verify=True,
             )
             # Move the logger here, before the return
-            logger.warning(f"Payload: {json.dumps(payload, indent=2)}")
+            # logger.warning(f"Payload: {json.dumps(payload, indent=2)}")
             return payload
         except jwt.InvalidTokenError:
             logger.exception("Kunne ikke validere akkreditering")
