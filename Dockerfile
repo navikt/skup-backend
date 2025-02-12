@@ -1,5 +1,5 @@
 # Use the official Python image from the Docker Hub
-FROM python:3.11-slim
+FROM python:3.13-slim
 
 # Install required system libraries
 RUN apt-get update && apt-get install -y \
